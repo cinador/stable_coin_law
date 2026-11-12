@@ -1,0 +1,15 @@
+{
+  "name": "board-watch",
+  "version": "1.0.0",
+  "description": "게시판 새 글을 Slack으로 알려주는 스크립트",
+  "main": "board_watch.js",
+  "scripts": {
+    "start": "node board_watch.js"
+  },
+  "engines": {
+    "node": ">=20.12"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0"
+  }
+}
