@@ -1,0 +1,49 @@
+name: Board watch (self-hosted)
+
+on:
+  schedule:
+    - cron: "7 * * * *"   # 매시 7분 (정각은 GitHub 스케줄러가 붐벼서 피함). 시간대 무관
+  workflow_dispatch:       # Actions 탭에서 수동 실행
+
+permissions:
+  contents: write          # board_seen.json 커밋용
+
+concurrency:               # 이전 실행이 안 끝났으면 겹치지 않게 대기
+  group: board-watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: self-hosted   # 이 레포에 등록한 내 러너에서 실행
+    timeout-minutes: 10    # 혹시 멈춰도 10분 뒤 강제 종료 (다음 실행이 막히지 않게)
+    defaults:
+      run:
+        shell: bash        # Windows 러너라면 Git Bash 필요 (Git for Windows 설치 시 포함)
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Check board
+        run: node board_watch.js
+        env:
+          BOARD_URL: ${{ secrets.BOARD_URL }}
+          SITE_NAME: ${{ secrets.SITE_NAME }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Save board_seen.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add board_seen.json
+          if git diff --cached --quiet; then
+            echo "변경 없음"
+          else
+            git commit -m "update seen [skip ci]"
+            git push
+          fi
