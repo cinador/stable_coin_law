@@ -14,11 +14,8 @@ concurrency:               # 이전 실행이 안 끝났으면 겹치지 않게 
 
 jobs:
   watch:
-    runs-on: self-hosted   # 이 레포에 등록한 내 러너에서 실행
-    timeout-minutes: 10    # 혹시 멈춰도 10분 뒤 강제 종료 (다음 실행이 막히지 않게)
-    defaults:
-      run:
-        shell: bash        # Windows 러너라면 Git Bash 필요 (Git for Windows 설치 시 포함)
+    runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v5
 
